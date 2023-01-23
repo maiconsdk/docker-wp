@@ -1,0 +1,44 @@
+version: '3.3'
+
+services: 
+    wordpress:
+        build: .
+        restart: always
+        ports: 
+            - 8080:80
+        environment: 
+            WORDPRESS_DB_HOST: db
+            WORDPRESS_DB_USER: wpuser
+            WORDPRESS_DB_PASSWORD: wppass
+            WORDPRESS_DB_NAME: wpdb
+            WORDPRESS_DEBUG: false
+        volumes: 
+            - ./01-WP/wp-config.php:/var/www/html/wp-config.php
+            - ./01-WP/.htaccess:/var/www/html/.htaccess
+            - ./02-Theme/:/var/www/html/wp-content/themes/custom-theme
+            - ./03-Plugin/:/var/www/html/wp-content/plugins/custom-plugin
+
+    db:
+        image: mariadb:10.9.4
+        restart: always
+        environment: 
+            MARIADB_DATABASE: wpdb
+            MARIADB_USER: wpuser
+            MARIADB_PASSWORD: wppass
+            MARIADB_RANDOM_ROOT_PASSWORD: '1'
+        volumes: 
+            - db:/var/lib/mariadb
+
+    adminer:
+        depends_on: 
+            - db
+        image: adminer
+        restart: always
+        ports: 
+            - 8888:8080
+
+networks: 
+    back:
+        
+volumes: 
+    db:
